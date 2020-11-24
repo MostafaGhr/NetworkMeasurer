@@ -1,0 +1,15 @@
+{   
+    "pingDirectory":"./ping/",
+
+    "clientID":"12",
+
+    "brokerAdress":"localhost",
+
+    "traceDestination":"google.com",
+    "traceDepth":3,
+
+
+    "iperfDirectory":"./iperf/",
+    "iperfServerIP":"localhost",
+    "iperfServerPort":"5021"
+}

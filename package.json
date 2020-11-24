@@ -1,0 +1,23 @@
+{
+  "name": "networkmeasurer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "dependencies": {
+    "json2csv": "^5.0.5",
+    "mqtt": "^4.2.5",
+    "nodejs-traceroute": "^1.2.0",
+    "nodemon": "^2.0.6",
+    "ping": "^0.3.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@codeberg.org:MostafaGhr/NetworkMeasurer.git"
+  },
+  "author": "",
+  "license": "ISC"
+}
