@@ -11,5 +11,5 @@
 
     "iperfDirectory":"./iperf/",
     "iperfServerIP":"localhost",
-    "iperfServerPort":"5021"
+    "iperfServerPort":"5201"
 }

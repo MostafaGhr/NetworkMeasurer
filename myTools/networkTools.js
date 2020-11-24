@@ -17,7 +17,7 @@ trace_list=[]
 //end trace header
 
 
-function iperf_handler(iperf_path, iperf_server_address, iperf_port_address) {
+function iperf_handler(iperf_path, iperf_server_address, iperf_port_address, callback) {
     let date_ob = Date();
     date_ob = date_ob.split(" ").join("_");
     date_ob = date_ob.replace("+", "_plus");
@@ -27,7 +27,7 @@ function iperf_handler(iperf_path, iperf_server_address, iperf_port_address) {
     exec("mkdir " + iperf_path);
 
     // command to execute!
-    let comm = 'iperf3 -c ' + iperf_server_address + " -p " + iperf_port_address + " -J > " + iperf_path + date_ob + ".txt";
+    let comm = 'iperf3 -c ' + iperf_server_address + " -p " + iperf_port_address + " -J";
 
     console.log(comm);
 
@@ -36,9 +36,11 @@ function iperf_handler(iperf_path, iperf_server_address, iperf_port_address) {
             console.log(err);
             console.log(stdout);
             console.log(stderr);   
+            return callback(err, null, stdout);
         }
-        console.log("iperf done!");
-        
+        else {
+            callback(null, date_ob, stdout);
+        }
     })
 
 }
