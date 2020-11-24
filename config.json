@@ -6,7 +6,7 @@
     "brokerAdress":"localhost",
 
     "traceDestination":"google.com",
-    "traceDepth":3,
+    "traceDepth":4,
 
 
     "iperfDirectory":"./iperf/",
