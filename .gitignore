@@ -117,4 +117,7 @@ dist
 
 ping/*
 iperf/*
-node_modules/
+node_modules/*
+
+!ping/.gitkeep
+!iperf/.gitkeep
