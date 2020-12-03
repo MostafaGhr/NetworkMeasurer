@@ -16,7 +16,7 @@ const { settings } = require("cluster");
 var client = mqtt.connect("mqtt://" + config.brokerAdress, {
   will: { topic: statusTopic + "/" + config.clientID, payload: "off" },
 });
-
+console.log(config.clientID);
 // start default tasks
 networkTools.tracer("google.com", 4);
 
