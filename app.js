@@ -109,17 +109,14 @@ function startPing(parsedMessage) {
         if (err) {
           console.log(err);
         } else {
-          client.publish(
-            pingTopic + "/" + config.clientID,
-            { qos: 3 },
-            JSON.stringify({ ip: ip, date: date, time: res.time })
-          );
+          client.publish(pingTopic + "/" + config.clientID, JSON.stringify({ ip: ip, date: date, time: res.time }), {
+            qos: 2,
+          });
         }
       });
     }, parsedMessage["interval"])
   );
 }
-
 function stopPing() {
   if (!pingTimers.length == 0 && pingTimers !== undefined) {
     pingTimers.forEach((timer) => {
