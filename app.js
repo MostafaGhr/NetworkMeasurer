@@ -1,9 +1,6 @@
-const { json } = require("express");
 const fs = require("fs");
 let config = JSON.parse(fs.readFileSync("config.json"));
 
-var mqtt = require("mqtt");
-const { pingPublish } = require("./myTools/networkTools");
 const networkTools = require("./myTools/networkTools");
 
 // topics
@@ -12,36 +9,19 @@ statusTopic = "status";
 iperfTopic = "iperf";
 pingTopic = "ping";
 
+var mqtt = require("mqtt");
+const { settings } = require("cluster");
 var client = mqtt.connect("mqtt://" + config.brokerAdress, {
   will: { topic: statusTopic + "/" + config.clientID, payload: "off" },
 });
 
 // start default tasks
-networkTools.tracer(config.traceDestination, config.traceDepth);
+networkTools.tracer("google.com", 4);
 
 payloadSize = config.pingPayloadSize;
 sourceAddress = config.pingSourceAddress;
 
-pingInterval = setInterval(() => {
-  if (config.pingSourceAddress == "random") {
-    sourceAddress =
-      Math.floor(Math.random() * 255) +
-      1 +
-      "." +
-      Math.floor(Math.random() * 255) +
-      "." +
-      Math.floor(Math.random() * 255) +
-      "." +
-      Math.floor(Math.random() * 255);
-  }
-  networkTools.pingPublish(trace_list, payloadSize, sourceAddress, (err, ip, date, res) => {
-    if (err) {
-      console.log(err);
-    } else {
-      client.publish(pingTopic + "/" + config.clientID, JSON.stringify({ ip: ip, date: date, time: res.time }));
-    }
-  });
-}, config.pingInterval);
+pingTimers = [];
 
 // end start default tasks
 
@@ -68,50 +48,17 @@ client.on("message", function (topic, message) {
 
   if (parsedTopic[0] == config.clientID) {
     if (parsedTopic[1] == "traceReset") {
-      networkTools.tracer(config.traceDestination, config.traceDepth, (err, ip, res) => {
-        if (!err) {
-          client.publish(iperfTopic + "/" + config.clientID + "/" + time, output);
-        }
-      });
+      doTrace(JSON.parse(message));
     }
     if (parsedTopic[1] == "startTest") {
-      networkTools.iperf_handler(config.iperfServerIP, config.iperfServerPort, (err, time, output) => {
-        if (!err) {
-          client.publish(iperfTopic + "/" + config.clientID + "/" + time, output);
-        }
-      });
+      doIperf(JSON.parse(message));
     }
     if (parsedTopic[1] == "ping") {
-      if (message.toString() == "on") {
-        if (!pingInterval) {
-          pingInterval = setInterval(() => {
-            if (config.pingSourceAddress == "random") {
-              sourceAddress =
-                Math.floor(Math.random() * 255) +
-                1 +
-                "." +
-                Math.floor(Math.random() * 255) +
-                "." +
-                Math.floor(Math.random() * 255) +
-                "." +
-                Math.floor(Math.random() * 255);
-            }
-            networkTools.pingPublish(trace_list, payloadSize, sourceAddress, (err, ip, date, res) => {
-              if (err) {
-                console.log(err);
-              } else {
-                client.publish(
-                  pingTopic + "/" + config.clientID,
-                  JSON.stringify({ ip: ip, date: date, time: res.time })
-                );
-              }
-            });
-          }, config.pingInterval);
-        }
+      if (parsedTopic[2] == "start") {
+        startPing(JSON.parse(message));
       }
-      if (message.toString() == "off") {
-        clearInterval(pingInterval);
-        pingInterval = false;
+      if (parsedTopic[2] == "stop") {
+        stopPing();
       }
     }
     if (parsedTopic[1] == settingTopic) {
@@ -136,6 +83,69 @@ client.on("message", function (topic, message) {
   }
 });
 
+function startPing(parsedMessage) {
+  if (parsedMessage["src"] == "random") {
+    sourceAddress =
+      Math.floor(Math.random() * 255) +
+      1 +
+      "." +
+      Math.floor(Math.random() * 255) +
+      "." +
+      Math.floor(Math.random() * 255) +
+      "." +
+      Math.floor(Math.random() * 255);
+  } else if (parsedMessage["src"]) {
+    sourceAddress = parsedMessage["src"];
+  } else {
+    sourceAddress = null;
+  }
+  if (parsedMessage["dest"]) {
+    destAddress = [parsedMessage["dest"]];
+  } else {
+    destAddress = trace_list;
+  }
+  pingTimers.push(
+    setInterval(() => {
+      networkTools.pingPublish(destAddress, parsedMessage["load_size"], sourceAddress, (err, ip, date, res) => {
+        if (err) {
+          console.log(err);
+        } else {
+          client.publish(pingTopic + "/" + config.clientID, JSON.stringify({ ip: ip, date: date, time: res.time }));
+        }
+      });
+    }, parsedMessage["interval"])
+  );
+}
+
+function stopPing() {
+  if (!pingTimers.length == 0 && pingTimers !== undefined) {
+    pingTimers.forEach((timer) => {
+      clearInterval(timer);
+    });
+    pingTimers = [];
+  }
+}
+
+function doTrace(parsedMessage) {
+  stopPing();
+  networkTools.tracer(parsedMessage["dest"], parsedMessage["depth"]);
+}
+
+function doIperf(parsedMessage) {
+  parsedMessage["option1"] ? (option1 = parsedMessage["option1"]) : (option1 = "");
+  parsedMessage["option2"] ? (option2 = parsedMessage["option2"]) : (option2 = "");
+  networkTools.iperf_handler(
+    parsedMessage["server_ip"],
+    parsedMessage["server_port"],
+    option1,
+    option2,
+    (err, time, output) => {
+      if (!err) {
+        client.publish(iperfTopic + "/" + config.clientID + "/" + time, output);
+      }
+    }
+  );
+}
 client.on("close", () => {
   client.publish(statusTopic + config.clientID, "off");
 });

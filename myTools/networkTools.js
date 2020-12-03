@@ -16,7 +16,7 @@ const Traceroute = require("nodejs-traceroute");
 trace_list = [];
 //end trace header
 
-function iperf_handler(iperf_server_address, iperf_port_address, callback) {
+function iperf_handler(iperf_server_address, iperf_port_address, option1, option2, callback) {
   let date_ob = Date();
   date_ob = date_ob.split(" ").join("_");
   date_ob = date_ob.replace("+", "_plus");
@@ -26,7 +26,7 @@ function iperf_handler(iperf_server_address, iperf_port_address, callback) {
   // exec("mkdir " + iperf_path);
 
   // command to execute!
-  let comm = "iperf3 -c " + iperf_server_address + " -p " + iperf_port_address + " -J";
+  let comm = "iperf3 " + option1 + " -c " + iperf_server_address + " -p " + iperf_port_address + " -J " + option2;
 
   console.log(comm);
 
