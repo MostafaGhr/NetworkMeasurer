@@ -12,6 +12,7 @@ let ping_res = {};
 
 //trace header
 const Traceroute = require("nodejs-traceroute");
+const { stderr } = require("process");
 
 trace_list = [];
 //end trace header
@@ -133,4 +134,13 @@ function tracer(destination, depth) {
   }
 }
 
-module.exports = { iperf_handler, pingPublish, tracer };
+function bootChecker() {
+  exec("iperf3 -v", (err, stdout, stderr) => {
+    if (err) {
+      console.log("please install iperf3, then try starting application");
+      process.exit();
+    }
+  });
+}
+
+module.exports = { iperf_handler, pingPublish, tracer, bootChecker };

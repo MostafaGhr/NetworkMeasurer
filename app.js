@@ -3,6 +3,8 @@ let config = JSON.parse(fs.readFileSync("config.json"));
 
 const networkTools = require("./myTools/networkTools");
 
+networkTools.bootChecker();
+
 // topics
 settingTopic = "setting";
 statusTopic = "status";
@@ -17,9 +19,6 @@ var client = mqtt.connect("mqtt://" + config.brokerAdress, {
 
 // start default tasks
 networkTools.tracer("google.com", 4);
-
-payloadSize = config.pingPayloadSize;
-sourceAddress = config.pingSourceAddress;
 
 pingTimers = [];
 

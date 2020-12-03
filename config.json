@@ -1,11 +1,4 @@
 {
   "clientID": "1",
-  "brokerAdress": "localhost",
-  "traceDestination": "google.com",
-  "traceDepth": 4,
-  "iperfServerIP": "localhost",
-  "iperfServerPort": "5201",
-  "pingPayloadSize": 70,
-  "pingSourceAddress": null,
-  "pingInterval": 1000
+  "brokerAdress": "localhost"
 }
