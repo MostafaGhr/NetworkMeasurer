@@ -109,7 +109,11 @@ function startPing(parsedMessage) {
         if (err) {
           console.log(err);
         } else {
-          client.publish(pingTopic + "/" + config.clientID, JSON.stringify({ ip: ip, date: date, time: res.time }));
+          client.publish(
+            pingTopic + "/" + config.clientID,
+            { qos: 3 },
+            JSON.stringify({ ip: ip, date: date, time: res.time })
+          );
         }
       });
     }, parsedMessage["interval"])
